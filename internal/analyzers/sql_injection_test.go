@@ -10,42 +10,42 @@ func TestSQLInjectionAnalyzer_Analyze(t *testing.T) {
 	tests := []struct {
 		name     string
 		line     string
-		wantFind bool
+		want     bool
 	}{
 		{
 			name:     "Detects SELECT injection with comment",
 			line:     `"SELECT * FROM users WHERE name = %s"`,
-			wantFind: true,
+			want:     true,
 		},
 		{
 			name:     "Detects SELECT injection with like expression",
 			line:     `"SELECT id, name FROM customers WHERE email LIKE %s"`,
-			wantFind: true,
+			want:     true,
 		},
 		{
 			name:     "Detects SELECT injection with other clause after WHERE",
 			line:     `"SELECT * FROM logs WHERE timestamp > %s ORDER BY timestamp DESC"`,
-			wantFind: true,
+			want:     true,
 		},
 		{
 			name:     "Detects SELECT injection with muliple expression in WHERE",
 			line:     `"SELECT COUNT(*) FROM orders WHERE customer_id = %s AND status = 'shipped'"`,
-			wantFind: true,
+			want:     true,
 		},
 		{
 			name:     "Detects SELECT injection with nested query",
 			line:     `"SELECT * FROM users WHERE id IN (SELECT user_id FROM logins WHERE ip = %s)"`,
-			wantFind: true,
+			want:     true,
 		},
 		{
 			name:     "Ignores unrelated SQL keyword",
 			line:     `This is just a string with SELECTED text %s.`,
-			wantFind: false,
+			want:     false,
 		},
 		{
 			name:     "Ignores query without quotation marks",
 			line:     `SELECT * FROM users WHERE name = %s`,
-			wantFind: false,
+			want:     false,
 		},
 	}
 
@@ -55,8 +55,8 @@ func TestSQLInjectionAnalyzer_Analyze(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if found != test.wantFind {
-				t.Errorf("Expected %v, got %v", test.wantFind, found)
+			if found != test.want {
+				t.Errorf("Expected %v, got %v", test.want, found)
 			}
 		})
 	}
