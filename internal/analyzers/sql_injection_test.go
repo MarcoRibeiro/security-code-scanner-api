@@ -2,6 +2,8 @@ package analyzers
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSQLInjectionAnalyzer_Analyze(t *testing.T) {
@@ -10,55 +12,48 @@ func TestSQLInjectionAnalyzer_Analyze(t *testing.T) {
 	tests := []struct {
 		name     string
 		line     string
-		want     bool
+		expected     bool
 	}{
 		{
 			name:     "Detects SELECT injection with comment",
 			line:     `"SELECT * FROM users WHERE name = %s"`,
-			want:     true,
+			expected:     true,
 		},
 		{
 			name:     "Detects SELECT injection with like expression",
 			line:     `"SELECT id, name FROM customers WHERE email LIKE %s"`,
-			want:     true,
+			expected:     true,
 		},
 		{
 			name:     "Detects SELECT injection with other clause after WHERE",
 			line:     `"SELECT * FROM logs WHERE timestamp > %s ORDER BY timestamp DESC"`,
-			want:     true,
+			expected:     true,
 		},
 		{
 			name:     "Detects SELECT injection with muliple expression in WHERE",
 			line:     `"SELECT COUNT(*) FROM orders WHERE customer_id = %s AND status = 'shipped'"`,
-			want:     true,
+			expected:     true,
 		},
 		{
 			name:     "Detects SELECT injection with nested query",
 			line:     `"SELECT * FROM users WHERE id IN (SELECT user_id FROM logins WHERE ip = %s)"`,
-			want:     true,
+			expected:     true,
 		},
 		{
 			name:     "Ignores unrelated SQL keyword",
 			line:     `This is just a string with SELECTED text %s.`,
-			want:     false,
+			expected:     false,
 		},
 		{
 			name:     "Ignores query without quotation marks",
 			line:     `SELECT * FROM users WHERE name = %s`,
-			want:     false,
+			expected:     false,
 		},
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			found, err := analyzer.Analyze(test.line)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if found != test.want {
-				t.Errorf("Expected %v, got %v", test.want, found)
-			}
-		})
+		match, _ := analyzer.Analyze(test.line)
+		assert.Equal(t, test.expected, match, test.name)
 	}
 }
 
