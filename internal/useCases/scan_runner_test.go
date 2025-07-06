@@ -27,6 +27,7 @@ func TestRunScan(t *testing.T) {
 	file1 := filepath.Join(dir, "file1.go")
 	file2 := filepath.Join(dir, "file2.go")
 	file3 := filepath.Join(dir, "ignore.go")
+	file4 := filepath.Join(dir, "notSupportedExtension.txt")
 
 	subdir := filepath.Join(dir, "subfolder")
 	os.Mkdir(subdir, 0755)
@@ -34,6 +35,7 @@ func TestRunScan(t *testing.T) {
 	os.WriteFile(file1, []byte("safe\nmatchme\n"), 0644)
 	os.WriteFile(file2, []byte("matchme\n"), 0644)
 	os.WriteFile(file3, []byte("matchme\n"), 0644)
+	os.WriteFile(file4, []byte("matchme\n"), 0644)
 	os.WriteFile(subfile, []byte("matchme\n"), 0644)
 
 	ignoredDir := filepath.Join(dir, "ignoredFolder")
