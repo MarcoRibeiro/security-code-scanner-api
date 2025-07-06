@@ -5,7 +5,9 @@ import (
 )
 
 type CreateScanRequest struct {
+	// Path is the file or directory to scan.
 	Path         string   `json:"path" binding:"required"` 
+	// Configuration contains settings for the scan.
 	Configuration *Configuration `json:"configuration" binding:"required"`
 }
 

@@ -1,0 +1,94 @@
+definitions:
+  dto.Configuration:
+    properties:
+      exclude:
+        description: Exclude is a list of file patterns to exclude from the scan.
+        items:
+          type: string
+        type: array
+    type: object
+  dto.CreateScanRequest:
+    properties:
+      configuration:
+        allOf:
+        - $ref: '#/definitions/dto.Configuration'
+        description: Configuration contains settings for the scan.
+      path:
+        description: Path is the file or directory to scan.
+        type: string
+    required:
+    - configuration
+    - path
+    type: object
+  dto.FindingResponse:
+    properties:
+      file:
+        description: File is the path to the file where the finding was detected.
+        type: string
+      line:
+        description: Line is the line number in the file where the finding was detected.
+        type: integer
+      message:
+        description: Message is a description of the finding.
+        type: string
+      rule:
+        description: Rule is the identifier for the rule that was violated.
+        type: string
+    type: object
+  dto.ScanResponse:
+    properties:
+      done:
+        description: Done indicates whether the scan has completed.
+        type: boolean
+      findings:
+        description: Findings contains the results of the scan.
+        items:
+          $ref: '#/definitions/dto.FindingResponse'
+        type: array
+      id:
+        description: Id is the unique identifier for the scan.
+        type: string
+      path:
+        description: Path is the file or directory that was scanned.
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for running security code scans.
+  title: Security Code Scanner API
+  version: "1.0"
+paths:
+  /v1/scans:
+    post:
+      consumes:
+      - application/json
+      description: Starts a security scan on the given path using the configured analyzers.
+      parameters:
+      - description: Scan configuration
+        in: body
+        name: scan
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateScanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ScanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Start a security scan
+      tags:
+      - scans
+swagger: "2.0"
