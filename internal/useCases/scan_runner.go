@@ -1,14 +1,13 @@
 package useCases
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
 	"github.com/marrcoribeiro/security-scanner-api/internal/domain"
+	"github.com/marrcoribeiro/security-scanner-api/internal/utils"
 )
 
 type ScanRunner struct{}
@@ -18,51 +17,24 @@ func NewScanRunner() *ScanRunner {
 }
 
 func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
-	excludeMap := make(map[string]struct{})
-	for _, ex := range scan.Configuration.Exclude {
-		excludeMap[ex] = struct{}{}
+	ignores := []string{}
+
+	if condition := scan.Configuration != nil && scan.Configuration.Exclude != nil; condition {
+		ignores = scan.Configuration.Exclude
 	}
 
-	err := filepath.Walk(scan.Path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			scan.Err = fmt.Sprintf("Error accessing path %s: %v", path, err)
-			return err
-		}
-
-		base := filepath.Base(path)
-		if _, found := excludeMap[base]; found {
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		file, err := os.Open(path)
-		if err != nil {
-			scan.Err = fmt.Sprintf("Error opening file %s: %v", path, err)
-			return nil
-		}
-		defer file.Close()
-
+	err := utils.WalkExcludingFilesAndDirs(scan.Path, ignores, func(path string) error {
 		fileExt := strings.ToLower(filepath.Ext(path))
-		lineNum := 0
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			lineNum++
-			line := scanner.Text()
-			for _, analyzer := range analyzers {
-				supported := slices.Contains(analyzer.SupportedFileExtensions(), fileExt)
-				if !supported {
-					continue
-				}
-				match, err := analyzer.Analyze(line)
-				if err != nil {
-					continue
-				}
+		supportedAnalyzers := filterSupportedAnalyzers(analyzers, fileExt)
+
+		if len(supportedAnalyzers) == 0 {
+			return nil
+		}
+
+		err := utils.ReadFileByLine(path, func(line string, lineNum int) error {
+			for _, analyzer := range supportedAnalyzers {
+				match := analyzer.Analyze(line)
+				
 				if match {
 					finding := domain.Finding{
 						Rule:    analyzer.Name(),
@@ -73,7 +45,13 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 					scan.Findings = append(scan.Findings, finding)
 				}
 			}
+			return nil
+		})
+
+		if err != nil {
+			return fmt.Errorf("error reading file %s: %w", path, err)
 		}
+
 		return nil
 	})
 
@@ -84,4 +62,14 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 	}
 
 	scan.Done = true
+}
+
+func filterSupportedAnalyzers(analyzers []domain.Analyzer, fileExt string) []domain.Analyzer {
+	supported := []domain.Analyzer{}
+	for _, analyzer := range analyzers {
+		if slices.Contains(analyzer.SupportedFileExtensions(), fileExt) {
+			supported = append(supported, analyzer)
+		}
+	}
+	return supported
 }

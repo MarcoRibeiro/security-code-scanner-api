@@ -52,7 +52,7 @@ func TestCrossSiteScriptingAnalyzer_Analyze(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		match, _ := analyzer.Analyze(test.line)
+		match := analyzer.Analyze(test.line)
 		assert.Equal(t, test.expected, match, test.name)
 	}
 }

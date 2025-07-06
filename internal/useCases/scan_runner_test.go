@@ -17,8 +17,8 @@ type mockAnalyzer struct {
 
 func (m *mockAnalyzer) Name() string { return m.name }
 func (m *mockAnalyzer) SupportedFileExtensions() []string { return m.extensions }
-func (m *mockAnalyzer) Analyze(data string) (bool, error) {
-	return data == m.matchLine, nil
+func (m *mockAnalyzer) Analyze(data string) bool {
+	return data == m.matchLine
 }
 
 func TestRunScan(t *testing.T) {
@@ -26,7 +26,7 @@ func TestRunScan(t *testing.T) {
 	dir := t.TempDir()
 	file1 := filepath.Join(dir, "file1.go")
 	file2 := filepath.Join(dir, "file2.go")
-	file3 := filepath.Join(dir, "ignore.txt")
+	file3 := filepath.Join(dir, "ignore.go")
 
 	subdir := filepath.Join(dir, "subfolder")
 	os.Mkdir(subdir, 0755)
@@ -42,7 +42,7 @@ func TestRunScan(t *testing.T) {
 	os.WriteFile(ignoredFile, []byte("matchme\n"), 0644)
 
 	configuration := &domain.Configuration{
-		Exclude: []string{"ignore.txt", "ignoredFolder"},
+		Exclude: []string{"ignore.go", "ignoredFolder"},
 	}
 	scan := &domain.Scan{
 		Path: dir,
