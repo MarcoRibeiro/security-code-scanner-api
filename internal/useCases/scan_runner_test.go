@@ -3,10 +3,10 @@ package useCases
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/marrcoribeiro/security-scanner-api/internal/domain"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockAnalyzer struct {
@@ -22,6 +22,7 @@ func (m *mockAnalyzer) Analyze(data string) (bool, error) {
 }
 
 func TestRunScan(t *testing.T) {
+	// Arrange
 	dir := t.TempDir()
 	file1 := filepath.Join(dir, "file1.go")
 	file2 := filepath.Join(dir, "file2.go")
@@ -51,26 +52,16 @@ func TestRunScan(t *testing.T) {
 		&mockAnalyzer{name: "Mock", extensions: []string{".go"}, matchLine: "matchme"},
 	}
 
+	// Act
 	RunScan(scan, analyzers)
 
-	if len(scan.Findings) != 3 {
-		t.Errorf("expected 3 findings, got %d", len(scan.Findings))
-	}
-	for _, f := range scan.Findings {
-		if f.Rule != "Mock" {
-			t.Errorf("unexpected rule: %s", f.Rule)
-		}
-		if f.Message != "matchme" {
-			t.Errorf("unexpected message: %s", f.Message)
-		}
-		if strings.Contains(f.File, "ignoredFolder") {
-			t.Errorf("should not scan files in ignoredFolder, but found: %s", f.File)
-		}
-	}
-	if !scan.Done {
-		t.Error("scan.Done should be true")
-	}
-	if scan.Err != "" {
-		t.Errorf("unexpected scan.Err: %s", scan.Err)
-	}
+	// Assert
+	assert.Equal(t, 3, len(scan.Findings), "expected 3 findings")
+	assert.ElementsMatch(t, []domain.Finding{
+		{Rule: "Mock", File: file1, Message: "matchme", Line: 2},
+		{Rule: "Mock", File: file2, Message: "matchme", Line: 1},
+		{Rule: "Mock", File: subfile, Message: "matchme", Line: 1},
+	}, scan.Findings, "findings should match expected results")
+	assert.Equal(t, true, scan.Done, "scan should be marked as done")
+	assert.Empty(t, scan.Err, "scan should not have errors")
 }
