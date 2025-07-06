@@ -49,18 +49,20 @@ func TestRunScan(t *testing.T) {
 		Configuration: configuration,
 	}
 	analyzers := []domain.Analyzer{
-		&mockAnalyzer{name: "Mock", extensions: []string{".go"}, matchLine: "matchme"},
+		&mockAnalyzer{name: "really dangerous thing", extensions: []string{".go"}, matchLine: "matchme"},
 	}
 
+	scanner := NewScanRunner()
+
 	// Act
-	RunScan(scan, analyzers)
+	scanner.RunScan(scan, analyzers)
 
 	// Assert
 	assert.Equal(t, 3, len(scan.Findings), "expected 3 findings")
 	assert.ElementsMatch(t, []domain.Finding{
-		{Rule: "Mock", File: file1, Message: "matchme", Line: 2},
-		{Rule: "Mock", File: file2, Message: "matchme", Line: 1},
-		{Rule: "Mock", File: subfile, Message: "matchme", Line: 1},
+		{Rule: "really dangerous thing", File: file1, Message: "matchme", Line: 2},
+		{Rule: "really dangerous thing", File: file2, Message: "matchme", Line: 1},
+		{Rule: "really dangerous thing", File: subfile, Message: "matchme", Line: 1},
 	}, scan.Findings, "findings should match expected results")
 	assert.Equal(t, true, scan.Done, "scan should be marked as done")
 	assert.Empty(t, scan.Err, "scan should not have errors")

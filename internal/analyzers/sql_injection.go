@@ -21,7 +21,7 @@ func (a *SQLInjectionAnalyzer) SupportedFileExtensions() []string {
 	return []string{".cs", ".go", ".java", ".js", ".php", ".py", ".rb", ".ts"}
 }
 
-func (a *SQLInjectionAnalyzer) Analyze(data string) (bool, error) {	
-	matches := a.pattern.MatchString(data)
+func (a *SQLInjectionAnalyzer) Analyze(line string) (bool, error) {	
+	matches := a.pattern.MatchString(line)
 	return matches, nil
 }

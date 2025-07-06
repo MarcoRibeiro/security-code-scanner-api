@@ -21,7 +21,7 @@ func (a *CrossSiteScriptingAnalyzer) SupportedFileExtensions() []string {
 	return []string{".html", ".js"}
 }
 
-func (a *CrossSiteScriptingAnalyzer) Analyze(data string) (bool, error) {
-	matches := a.scriptTagRegex.MatchString(data)
+func (a *CrossSiteScriptingAnalyzer) Analyze(line string) (bool, error) {
+	matches := a.scriptTagRegex.MatchString(line)
 	return matches, nil
 }

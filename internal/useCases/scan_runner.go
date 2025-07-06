@@ -11,13 +11,19 @@ import (
 	"github.com/marrcoribeiro/security-scanner-api/internal/domain"
 )
 
-func RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
+type ScanRunner struct{}
+
+func NewScanRunner() *ScanRunner {
+	return &ScanRunner{}
+}
+
+func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 	excludeMap := make(map[string]struct{})
 	for _, ex := range scan.Configuration.Exclude {
 		excludeMap[ex] = struct{}{}
 	}
 
-	filepath.Walk(scan.Path, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(scan.Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			scan.Err = fmt.Sprintf("Error accessing path %s: %v", path, err)
 			return err
@@ -70,6 +76,12 @@ func RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 		}
 		return nil
 	})
+
+	if err != nil {
+		scan.Err = fmt.Sprintf("Error during scan: %v", err)
+		scan.Done = false
+		return
+	}
 
 	scan.Done = true
 }
