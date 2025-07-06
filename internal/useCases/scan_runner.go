@@ -17,13 +17,13 @@ func NewScanRunner() *ScanRunner {
 }
 
 func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
-	ignores := []string{}
+	excludes := []string{}
 
 	if condition := scan.Configuration != nil && scan.Configuration.Exclude != nil; condition {
-		ignores = scan.Configuration.Exclude
+		excludes = scan.Configuration.Exclude
 	}
 
-	err := utils.WalkExcludingFilesAndDirs(scan.Path, ignores, func(path string) error {
+	err := utils.WalkExcludingFilesAndDirs(scan.Path, excludes, func(path string) error {
 		fileExt := strings.ToLower(filepath.Ext(path))
 		supportedAnalyzers := filterSupportedAnalyzers(analyzers, fileExt)
 
