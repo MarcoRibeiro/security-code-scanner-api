@@ -32,19 +32,7 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 		}
 
 		err := utils.ReadFileByLine(path, func(line string, lineNum int) error {
-			for _, analyzer := range supportedAnalyzers {
-				match := analyzer.Analyze(line)
-				
-				if match {
-					finding := domain.Finding{
-						Rule:    analyzer.Name(),
-						File:    path,
-						Message: line,
-						Line:    lineNum,
-					}
-					scan.Findings = append(scan.Findings, finding)
-				}
-			}
+			runAnalyzers(scan, supportedAnalyzers, path, line, lineNum)
 			return nil
 		})
 
@@ -62,6 +50,22 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 	}
 
 	scan.Done = true
+}
+
+func runAnalyzers(scan *domain.Scan, analyzers []domain.Analyzer, path string, line string, lineNum int) {
+	for _, analyzer := range analyzers {
+		match := analyzer.Analyze(line)
+		
+		if match {
+			finding := domain.Finding{
+				Rule:    analyzer.Name(),
+				File:    path,
+				Message: line,
+				Line:    lineNum,
+			}
+			scan.Findings = append(scan.Findings, finding)
+		}
+	}
 }
 
 func filterSupportedAnalyzers(analyzers []domain.Analyzer, fileExt string) []domain.Analyzer {
