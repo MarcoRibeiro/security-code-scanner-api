@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/marrcoribeiro/security-scanner-api/internal/domain"
 	"github.com/marrcoribeiro/security-scanner-api/internal/utils"
@@ -17,6 +18,9 @@ func NewScanRunner() *ScanRunner {
 }
 
 func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
+	mu := sync.Mutex{}
+	wg := sync.WaitGroup{}
+
 	excludes := []string{}
 
 	if condition := scan.Configuration != nil && scan.Configuration.Exclude != nil; condition {
@@ -30,19 +34,20 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 		if len(supportedAnalyzers) == 0 {
 			return nil
 		}
-
-		err := utils.ReadFileByLine(path, func(line string, lineNum int) error {
-			runAnalyzers(scan, supportedAnalyzers, path, line, lineNum)
-			return nil
-		})
-
-		if err != nil {
-			return fmt.Errorf("error reading file %s: %w", path, err)
-		}
-
+		
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			utils.ReadFileByLine(path, func(line string, lineNum int) error {
+				runAnalyzers(scan, supportedAnalyzers, path, line, lineNum, &mu)
+				return nil
+			})
+		}()
+		
 		return nil
 	})
 
+	wg.Wait()
 	if err != nil {
 		scan.Err = fmt.Sprintf("Error during scan: %v", err)
 		scan.Done = false
@@ -52,7 +57,7 @@ func (s *ScanRunner) RunScan(scan *domain.Scan, analyzers []domain.Analyzer) {
 	scan.Done = true
 }
 
-func runAnalyzers(scan *domain.Scan, analyzers []domain.Analyzer, path string, line string, lineNum int) {
+func runAnalyzers(scan *domain.Scan, analyzers []domain.Analyzer, path string, line string, lineNum int, mu *sync.Mutex) {
 	for _, analyzer := range analyzers {
 		match := analyzer.Analyze(line)
 		
@@ -63,7 +68,9 @@ func runAnalyzers(scan *domain.Scan, analyzers []domain.Analyzer, path string, l
 				Message: line,
 				Line:    lineNum,
 			}
+			mu.Lock()
 			scan.Findings = append(scan.Findings, finding)
+			mu.Unlock()
 		}
 	}
 }
