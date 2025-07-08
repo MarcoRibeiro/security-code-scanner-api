@@ -28,8 +28,9 @@ func main() {
 	}
 
 	scanRunner := useCases.NewScanRunner()
+	scanRunnerUrl := useCases.NewScanRunnerUrl(scanRunner)
 
-	scansController := scans.NewController(analyzersList, scanRunner)
+	scansController := scans.NewController(analyzersList, scanRunnerUrl)
 
 	scansController.MountRoutes(&router.RouterGroup)
 
