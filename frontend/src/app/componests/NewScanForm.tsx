@@ -8,7 +8,6 @@ import { createScanRequestSchema } from "@/lib/dto/scan.schema";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
