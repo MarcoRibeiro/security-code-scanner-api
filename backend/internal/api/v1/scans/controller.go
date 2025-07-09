@@ -53,5 +53,5 @@ func (c *Controller) ScanHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"scan": dto.ToResponse(scan)})
+	ctx.JSON(http.StatusOK, dto.ToResponse(scan))
 }
