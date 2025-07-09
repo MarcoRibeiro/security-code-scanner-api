@@ -9,6 +9,7 @@ import { Success } from "./Success";
 import { Pending } from "./Pending";
 import { FileFindingsTable } from "./FileFindingsTable";
 import { GeneralView } from "./GeneralView";
+import { Badge } from "@/components/ui/badge";
 
 interface ShowScanResultProps {
   data?: ScanResponse;
