@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { NewScanForm } from "./componests/NewScanForm";
-import { ShowScanResult } from "./componests/ShowScanResult";
+import { ResultPanel } from "./componests/ResultPanel";
 import { useCreateScan } from "./hooks/useCreateScan";
 
 export default function Home() {
@@ -18,11 +17,7 @@ export default function Home() {
         />
       </div>
       <div className="col-span-1 p-4 overflow-y-auto">
-        <ShowScanResult
-          data={data}
-          isSuccess={isSuccess}
-          isPending={isPending}
-        />
+        <ResultPanel data={data} isSuccess={isSuccess} isPending={isPending} />
       </div>
     </div>
   );
