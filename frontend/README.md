@@ -1,34 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Security Code Scanner – Frontend
+
+This is the frontend for the Security Code Scanner project, built with [Next.js](https://nextjs.org) and [Tailwind CSS](https://tailwindcss.com/).
+
+## Features
+
+- Modern UI for submitting and viewing code scan results
+- Integration with the backend API for security scanning
+- Responsive and accessible design
+- Uses [shadcn/ui](https://ui.shadcn.com) for visual components
+- Uses [zod](https://zod.dev/) for form validation
+- Uses [React Query](https://tanstack.com/query/latest) for data fetching and caching
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   pnpm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   pnpm dev
+   ```
 
-## Learn More
+3. Open http://localhost:3000 in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- src/app/ – Main app and page components
+- src/lib/dto/ – TypeScript DTOs for API communication
+- src/app/componests/ – UI components for forms and results
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API
 
-## Deploy on Vercel
+- This frontend expects the backend API to be running. See the main project or backend README for details.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Libs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- UI: [shadcn/ui](https://ui.shadcn.com)
+- Validation: [zod](https://zod.dev/)
+- Data fetching: [React Query](https://tanstack.com/query/latest)
+- Tailwind CSS is used for styling; edit globals.css or use Tailwind utility classes.
