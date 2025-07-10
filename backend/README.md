@@ -64,6 +64,7 @@ This is the backend API for the Security Code Scanner project. It provides endpo
   ```json
   {
     "scan": {
+      "path": "C:\\Users\\marco\\AppData\\Local\\Temp\\repo-2150606555",
       "findings": [
         {
           "rule": "SQL Injection Analyzer",
@@ -71,7 +72,8 @@ This is the backend API for the Security Code Scanner project. It provides endpo
           "message": "SELECT * FROM users WHERE ...",
           "line": 42
         }
-      ]
+      ],
+      "done": true
     }
   }
   ```
