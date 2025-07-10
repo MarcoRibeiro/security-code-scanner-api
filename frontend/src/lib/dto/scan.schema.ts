@@ -17,6 +17,6 @@ export const scanResponseSchema = z.object({
 export const createScanRequestSchema = z.object({
   path: z.string().nonempty(),
   configuration: z.object({
-    exclude: z.array(z.string()).optional(),
+    exclude: z.union([z.array(z.string()), z.string()]).optional(),
   }),
 });
